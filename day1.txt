@@ -1,0 +1,50 @@
+Day 1 Notes – Database Table Design (PostgreSQL/MySQL Concepts)
+
+1. Learning Objectives Today:
+
+Understanding how to design tables with appropriate columns and constraints.
+Choosing the correct data types for different kinds of data.
+Using default values and NOT NULL constraints to ensure data integrity.
+Planning effective tables for real-world applications.
+Learning about comments to document SQL code.
+
+2. Example Table: Students
+
+Columns:
+StudentID – Integer type, primary key, uniquely identifies each student.
+Name – String type (varchar 50), cannot be null, stores student names.
+Age – Integer type, cannot be null, default value 15 (if not provided).
+Department – String type (varchar 50), default value 'Unknown'.
+Design Considerations:
+Use primary key to uniquely identify each record.
+Use NOT NULL for mandatory fields like Name and Age.
+Use default values to simplify data entry.
+Keep column names descriptive but concise.
+
+3. Example Table: Employee
+
+Columns:
+Employee_id – Integer type, auto-incrementing, primary key to uniquely identify employees.
+Name – String type (varchar 50), stores employee names.
+salaryDate – Timestamp type, default value is current date and time when record is inserted.
+Design Considerations:
+Auto-increment ensures unique IDs without manual entry.
+Timestamps track when a record is created, useful for auditing.
+Keep column data types appropriate for the data stored (text, integer, datetime).
+
+4. Effective Table Design Principles Learned:
+
+Primary Keys: Always assign a unique identifier to each table for reliable reference.
+Data Types: Choose types carefully to optimize storage and performance.
+Default Values: Provide defaults to reduce missing or inconsistent data.
+Not Null Constraints: Ensure essential columns are always filled.
+Consistency: Keep naming conventions and column types consistent across tables.
+Documentation: Use comments to explain table purpose and column usage.
+Future-proofing: Design tables to accommodate future changes without breaking the structure.
+
+5. Key Takeaways:
+
+Tables are the foundation of a database.
+Thoughtful design prevents errors and improves efficiency.
+Default values, constraints, and correct data types ensure clean and reliable data.
+Learning SQL comments is important for readability and team collaboration
