@@ -1,0 +1,59 @@
+Day 2 Notes – SQL Server (DB-800 Practical Practice)
+
+1. What I Did Today:
+
+Installed and set up SQL Server and SSMS.
+Created a new practice database for learning.
+Created tables (Students and Employee).
+Inserted multiple rows of data into tables.
+Practiced selecting and filtering data.
+Performed update and delete operations.
+Checked whether tables exist in the database.
+Learned how to delete a database.
+
+2. Tables I Worked With:
+
+Students Table:
+
+StudentID → Integer, Primary Key
+Name → Varchar (50), Not Null
+Age → Integer, Default value 15
+Department → Varchar (50), Default ‘Unknown’
+
+Employee Table:
+
+Employee_id → Integer, Auto-increment (Identity) Primary Key
+Name → Varchar (50)
+SalaryDate → DateTime, Default current date and time
+
+3. Key Skills Practiced:
+
+Creating structured tables with constraints.
+Inserting single and multiple records.
+Using default values automatically.
+Filtering data using conditions (like name).
+Updating existing records.
+Deleting specific records.
+Viewing tables using both GUI (SSMS) and queries.
+
+4. Important Learnings:
+
+Auto-increment columns generate values automatically (no need to insert manually).
+Default values are used when no value is provided.
+Correct database must be selected before working with tables.
+Table names must match exactly while querying.
+Deleting a database removes all data permanently.
+
+5. Mistakes I Faced & Fixed:
+
+Tried inserting values into auto-increment column.
+Confused syntax between MySQL, PostgreSQL, and SQL Server.
+Forgot to match columns with values during insert.
+Didn’t switch database before running queries.
+
+6. Key Takeaways:
+
+Hands-on practice is helping me understand SQL faster.
+SQL Server syntax is different from MySQL/PostgreSQL.
+Creating, inserting, and querying data are core database skills.
+Small mistakes help me learn faster and improve.
