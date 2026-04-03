@@ -1,0 +1,147 @@
+DAY 3 — CONSTRAINTS
+Date: 2026-04-03
+Topic: PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, DEFAULT
+
+1. THE 5 CONSTRAINTS
+
+PRIMARY KEY  → uniquely identifies each row, cannot be NULL,
+               only 1 per table, auto creates clustered index
+
+FOREIGN KEY  → links to another table's PRIMARY KEY,
+               prevents inserting data that doesn't exist
+               in parent table
+
+UNIQUE       → no duplicate values allowed in that column,
+               but can be NULL unlike PRIMARY KEY
+
+CHECK        → validates data with a condition,
+               rejects data that fails the condition
+
+DEFAULT      → auto fills a value when none is provided
+               during INSERT
+
+2. SYNTAX TO REMEMBER
+
+-- CHECK
+CHECK (HighPrice >= LowPrice)
+CHECK (Volume >= 0)
+CHECK (LEN(Symbol) >= 2)
+CHECK (PE_Ratio > 0)
+
+-- DEFAULT
+ListedDate DATE DEFAULT GETDATE()
+IsActive   BIT  DEFAULT 1
+Volume     BIGINT DEFAULT 0
+
+-- FOREIGN KEY
+FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
+
+-- UNIQUE on two columns combined
+UNIQUE (CompanyID, FiscalYear)
+
+3. TABLE RELATIONSHIP DIAGRAM
+
+Companies Table          StockPrice Table
+─────────────────        ─────────────────
+CompanyID (PK) ◄──────── CompanyID (FK)
+Symbol (UNIQUE)          TradeDate
+CompanyName              OpenPrice
+Sector                   HighPrice
+ListedDate               LowPrice
+IsActive                 ClosePrice
+                         Volume
+
+Companies Table          Financials Table
+─────────────────        ─────────────────
+CompanyID (PK) ◄──────── CompanyID (FK)
+                         FiscalYear
+                         EPS
+                         PE_Ratio
+                         MarketCap
+                         ReportDate
+
+4. WHAT EACH TEST PROVED
+
+Test 1 PASSED  → good data always goes in cleanly
+Test 2 FAILED  → UNIQUE constraint blocked duplicate Symbol
+Test 3 FAILED  → CHECK constraint blocked Symbol length < 2
+Test 4 FAILED  → CHECK constraint blocked HighPrice < LowPrice
+Test 5 PASSED  → valid stock prices inserted correctly
+Test 6 FAILED  → FOREIGN KEY blocked CompanyID 99 (doesnt exist)
+
+5. DATA TYPES LEARNED TODAY
+
+DECIMAL(10,2)  → 10 total digits, 2 after decimal
+                 max value = 99999999.99
+                 use for: share prices like 1465.00
+
+DECIMAL(6,2)   → 6 total digits, 2 after decimal
+                 max value = 9999.99
+                 use for: PE ratio like 23.45
+
+BIT            → only stores 0 or 1
+                 0 = false/inactive/off
+                 1 = true/active/on
+                 DEFAULT 1 = auto fills 1 if not provided
+                 use for: IsActive (listed/delisted company)
+
+6. INFORMATION_SCHEMA QUERY
+
+-- How to see all constraints in your database
+SELECT
+    tc.constraint_Name,
+    tc.constraint_type,
+    tc.TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+WHERE tc.TABLE_CATALOG = 'NepseDB'
+ORDER BY tc.TABLE_NAME;
+
+-- INFORMATION_SCHEMA = special hidden database
+   that stores info ABOUT your database
+-- tc = alias/nickname (shortcut)
+-- TABLE_CATALOG = which database to look in
+-- Shows: constraint name, type, which table
+
+7. ERRORS LEARNED TODAY
+
+Msg 213 → Column count mismatch
+          your INSERT values dont match
+          number of columns in table
+          Fix: add missing column (TradeDate)
+
+Red squiggly line in SSMS → just intellisense cache
+          not a real error
+          Fix: Ctrl + Shift + R to refresh cache
+
+Always specify column names in INSERT:
+INSERT INTO StockPrice
+    (PriceId, CompanyId, TradeDate, ...)
+VALUES (...)
+This is safer than INSERT INTO StockPrice VALUES (...)
+
+8. KEY THINGS TO REMEMBER FOR EXAM
+
+→ One table = only ONE primary key (always)
+→ But PRIMARY KEY can use multiple columns combined
+  (called composite primary key)
+→ FOREIGN KEY does NOT auto create index
+  PRIMARY KEY auto creates clustered index
+→ CHECK constraint = validates with condition
+→ BIT = only 0 or 1, use for true/false columns
+→ INFORMATION_SCHEMA.TABLE_CONSTRAINTS = 
+  shows all constraints in database
+→ DECIMAL not FLOAT for money/prices
+  DECIMAL = exact, FLOAT = approximate
+
+9. CONFUSED ABOUT
+(write anything that didnt click today)
+
+10. UNDERSTOOD WELL
+(write what felt easy today)
+
+11. REAL WORLD CONNECTION
+CHECK (HighPrice >= LowPrice) prevents bad
+NEPSE price data from entering database.
+IsActive BIT tracks listed/delisted companies.
+FK prevents adding stock price for company
+that doesnt exist in Companies table.
