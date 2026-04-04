@@ -1,0 +1,115 @@
+DAY 4 — INDEXES
+Date: 2026-04-05
+Topic: Clustered, Non-Clustered, Columnstore Indexes
+
+1. THREE TYPES OF INDEXES
+
+CLUSTERED INDEX
+→ physically sorts table data by that column
+→ only 1 allowed per table
+→ PRIMARY KEY auto creates this automatically
+→ like register book sorted by ID number
+
+NON-CLUSTERED INDEX
+→ separate lookup list pointing to actual data
+→ up to 999 allowed per table
+→ you create manually for frequently searched columns
+→ like cheatsheet at back of book
+
+COLUMNSTORE INDEX
+→ stores data column by column (not row by row)
+→ best for analytics: SUM, AVG, GROUP BY
+→ used in data science, reporting, Power BI
+→ like reading only one spreadsheet column at a time
+
+2. SYNTAX TO REMEMBER
+
+-- Non-clustered index
+CREATE NONCLUSTERED INDEX IX_Companies_Symbol
+ON Companies(Symbol);
+
+-- Composite non-clustered (two columns)
+CREATE NONCLUSTERED INDEX IX_StockPrice_CompanyDate
+ON StockPrice(CompanyId, TradeDate);
+
+-- Clustered index (manual)
+CREATE CLUSTERED INDEX IX_StockSummary_Symbol
+ON StockSummary(Symbol);
+
+-- Columnstore index
+CREATE NONCLUSTERED COLUMNSTORE INDEX IX_StockSummary_Columnstore
+ON StockSummary(TotalVolume, AvgPrice);
+
+-- Disable index
+ALTER INDEX IX_StockPrice_TradeDate
+ON StockPrice DISABLE;
+
+-- Rebuild index
+ALTER INDEX IX_StockPrice_TradeDate
+ON StockPrice REBUILD;
+
+-- Drop index
+DROP INDEX IX_StockPrice_TradeDate ON StockPrice;
+
+3. SEE ALL INDEXES QUERY
+
+SELECT
+    i.name AS IndexName,
+    i.type_desc AS IndexType,
+    t.name AS TableName,
+    c.name AS ColumnName
+FROM sys.indexes i
+JOIN sys.tables t ON i.object_id = t.object_id
+JOIN sys.index_columns ic ON i.object_id = ic.object_id
+    AND i.index_id = ic.index_id
+JOIN sys.columns c ON ic.object_id = c.object_id
+    AND ic.column_id = c.column_id
+WHERE t.name IN ('Companies','StockPrice','Financials')
+AND i.type_desc = 'CLUSTERED';
+
+4. STATISTICS IO AND TIME
+
+SET STATISTICS IO ON;    -- measure data page reads
+SET STATISTICS TIME ON;  -- measure query speed
+
+-- run your query here
+
+SET STATISTICS IO OFF;
+SET STATISTICS TIME OFF;
+
+-- Check Messages tab in SSMS after running
+-- Logical reads → fewer = faster = index working
+-- Elapsed time  → lower = faster query
+
+5. WHAT EACH PROVED TODAY
+
+✅ PRIMARY KEY auto creates CLUSTERED index
+✅ Only 1 CLUSTERED index per table
+   (second one threw error — proved the rule)
+✅ CLUSTERED physically sorts data by that column
+✅ COLUMNSTORE speeds up SUM, AVG, GROUP BY
+✅ sys.indexes shows all indexes in database
+
+6. REAL WORLD USAGE
+
+CLUSTERED     → automatic, every table has it
+                rarely touched manually
+                Example: Orders, Transactions, PatientID
+
+NON-CLUSTERED → most common in real daily work
+                create when query is slow
+                Example: search by Email, Symbol, Name
+                90% of index work = this type
+
+COLUMNSTORE   → data science and analytics
+                Power BI, reporting, ML data prep
+                Example: NRB CPI analysis, NEPSE averages
+                your secret weapon as data scientist
+
+7. NEPSE CONTEXT
+
+Symbol search     → NON-CLUSTERED on Symbol
+Date filter       → NON-CLUSTERED on TradeDate
+Company + Date    → COMPOSITE NON-CLUSTERED
+Price analytics   → COLUMNSTORE on price columns
+Primary keys      → CLUSTERED (auto)
