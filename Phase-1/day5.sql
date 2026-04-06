@@ -55,3 +55,4 @@ VALUES
 
 -- Step 5: Check result
 SELECT * FROM Transactions;
+-- Just Commit 
