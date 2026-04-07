@@ -1,0 +1,313 @@
+DAY 6 — PARTITIONING
+Date: 2026-04-07
+Topic: Partition Function, Partition Scheme, 
+       SPLIT, MERGE, SWITCH
+========================================
+
+1. WHAT IS PARTITIONING
+
+-> Splits one big table into smaller physical pieces
+-> Based on a column value (like TradeDate)
+-> Looks like ONE table to you but stored separately
+-> Queries only search relevant partition = much faster
+
+Real NEPSE example:
+Without partitioning -> all years in one table
+                        finding 2026 = scan everything
+
+With partitioning    -> Partition 1 = 2022 data
+                        Partition 2 = 2023 data
+                        Partition 3 = 2024 data
+                        Partition 4 = 2025 data
+                        Partition 5 = 2026 data
+                        finding 2026 = only open partition 5
+
+Think of it like a filing cabinet:
+One drawer per year instead of everything in one drawer
+
+
+========================================
+2. THREE STEPS TO CREATE PARTITIONING
+   (ALWAYS IN THIS ORDER)
+========================================
+
+Step 1 -> Partition FUNCTION  (defines boundary values)
+Step 2 -> Partition SCHEME    (maps partitions to storage)
+Step 3 -> Create TABLE ON scheme (uses the partition)
+
+
+STEP 1: CREATE PARTITION FUNCTION
+
+CREATE PARTITION FUNCTION PF_StockByYear (DATE)
+AS RANGE RIGHT FOR VALUES (
+    '2023-01-01',
+    '2024-01-01',
+    '2025-01-01',
+    '2026-01-01'
+);
+
+-> Defines WHERE to split the data
+-> DATE = the column data type being partitioned
+-> RANGE RIGHT = boundary date goes to RIGHT (newer) partition
+-> RANGE LEFT  = boundary date goes to LEFT (older) partition
+-> 4 boundaries = 5 partitions created
+
+
+STEP 2: CREATE PARTITION SCHEME
+
+CREATE PARTITION SCHEME PS_StockByYear
+AS PARTITION PF_StockByYear
+ALL TO ([PRIMARY]);
+
+-> Maps each partition to a filegroup
+-> ALL TO ([PRIMARY]) = all partitions on main storage
+-> In enterprise: different partitions on different disks
+
+
+STEP 3: CREATE TABLE ON SCHEME
+
+CREATE TABLE StockPricePartitioned (
+    PriceId     INT NOT NULL,
+    CompanyId   INT NOT NULL,
+    TradeDate   DATE NOT NULL,
+    OpenPrice   DECIMAL(10,2),
+    HighPrice   DECIMAL(10,2),
+    LowPrice    DECIMAL(10,2),
+    ClosePrice  DECIMAL(10,2),
+    Volume      BIGINT
+) ON PS_StockByYear(TradeDate);
+
+-> ON PS_StockByYear(TradeDate) = use partition scheme
+-> TradeDate = the column that decides which partition
+-> This column is called the PARTITION KEY
+
+
+========================================
+3. CHECK PARTITION NUMBER OF EACH ROW
+========================================
+
+-- $PARTITION function (memorize this!)
+SELECT
+    PriceId,
+    TradeDate,
+    ClosePrice,
+    $PARTITION.PF_StockByYear(TradeDate) AS PartitionNumber
+FROM StockPricePartitioned
+ORDER BY TradeDate;
+
+-- Result:
+-- 2022 rows -> Partition 1
+-- 2023 rows -> Partition 2
+-- 2024 rows -> Partition 3
+-- 2025 rows -> Partition 4
+-- 2026 rows -> Partition 5
+
+-- Check which partition a specific date falls into
+SELECT $PARTITION.PF_StockByYear('2025-06-15') AS PartitionNumber;
+-- Result: 4
+
+
+========================================
+4. QUERY ONLY ONE PARTITION (faster!)
+========================================
+
+-- Query only 2026 data (searches partition 5 only)
+SELECT * FROM StockPricePartitioned
+WHERE TradeDate >= '2026-01-01';
+
+-- Query by partition number directly
+SELECT * FROM StockPricePartitioned
+WHERE $PARTITION.PF_StockByYear(TradeDate) = 5;
+
+
+========================================
+5. MODIFYING PARTITIONS
+========================================
+
+SPLIT RANGE -> adds new boundary = MORE partitions
+MERGE RANGE -> removes boundary  = FEWER partitions
+SWITCH      -> moves data        = FASTEST archiving
+
+
+SPLIT RANGE (add new partition for 2027):
+
+-- Step 1: Add new boundary to function
+ALTER PARTITION FUNCTION PF_StockByYear()
+SPLIT RANGE ('2027-01-01');
+
+-- Step 2: Tell scheme where to put new partition
+ALTER PARTITION SCHEME PS_StockByYear
+NEXT USED [PRIMARY];
+
+-> Use every January when new year starts
+-> Creates new empty partition for new year data
+
+
+MERGE RANGE (combine two old partitions):
+
+-- Merge 2022 and 2023 into one partition
+ALTER PARTITION FUNCTION PF_StockByYear()
+MERGE RANGE ('2023-01-01');
+
+-> Removes a boundary
+-> Two partitions become one
+-> Use when old data no longer needs to be separate
+
+
+SWITCH PARTITION (archive old data instantly):
+
+-- Create archive table with same structure
+CREATE TABLE StockPriceArchive (
+    PriceId     INT NOT NULL,
+    CompanyId   INT NOT NULL,
+    TradeDate   DATE NOT NULL,
+    OpenPrice   DECIMAL(10,2),
+    HighPrice   DECIMAL(10,2),
+    LowPrice    DECIMAL(10,2),
+    ClosePrice  DECIMAL(10,2),
+    Volume      BIGINT
+);
+
+-- Move partition 1 (2022 data) to archive instantly
+ALTER TABLE StockPricePartitioned
+SWITCH PARTITION 1 TO StockPriceArchive;
+
+-> Moves data in MILLISECONDS regardless of row count
+-> No actual data copying happens
+-> Just metadata change behind the scenes
+-> Most powerful partition operation in real work
+
+
+========================================
+6. CHECK PARTITION BOUNDARIES (simple query)
+========================================
+
+SELECT 
+    boundary_id,
+    value AS BoundaryDate
+FROM sys.partition_range_values prv
+JOIN sys.partition_functions pf 
+    ON prv.function_id = pf.function_id
+WHERE pf.name = 'PF_StockByYear';
+
+
+========================================
+7. WHAT TO MEMORIZE vs JUST UNDERSTAND
+========================================
+
+MEMORIZE (exam will ask you to write):
+-> CREATE PARTITION FUNCTION syntax
+-> CREATE PARTITION SCHEME syntax
+-> Table ON scheme syntax
+-> RANGE RIGHT vs RANGE LEFT
+-> $PARTITION.FunctionName(column) syntax
+-> 3 steps always in order
+
+JUST UNDERSTAND CONCEPT (no need to write from memory):
+-> SPLIT RANGE   = adds partition
+-> MERGE RANGE   = removes partition
+-> SWITCH        = moves data to archive
+-> sys.partition_range_values query
+
+
+========================================
+8. RANGE RIGHT vs RANGE LEFT
+========================================
+
+RANGE RIGHT:
+-> Boundary value belongs to RIGHT (newer) partition
+-> '2023-01-01' goes into 2023 partition
+-> Most common, used in this course
+
+RANGE LEFT:
+-> Boundary value belongs to LEFT (older) partition
+-> '2023-01-01' goes into 2022 partition
+-> Less common
+
+Easy memory trick:
+RIGHT = boundary date is the START of new partition
+LEFT  = boundary date is the END of old partition
+
+
+========================================
+9. REAL WORLD NEPSE USAGE
+========================================
+
+Every January 1st routine:
+-> SPLIT RANGE to add new year partition
+-> SWITCH old 5+ year data to archive table
+-> Archive table backed up to cheap storage
+-> Main table stays fast and lean
+
+Why this matters for NEPSE startup:
+-> NEPSE has daily trade data going back years
+-> Millions of rows eventually
+-> Without partitioning = slow queries
+-> With partitioning = fast even with huge data
+
+
+========================================
+10. EXAM TIPS
+========================================
+
+Q: What are the 3 steps to partition a table?
+A: 1. CREATE PARTITION FUNCTION
+   2. CREATE PARTITION SCHEME
+   3. CREATE TABLE ON scheme
+
+Q: You need to add 2027 partition. Which command?
+A: SPLIT RANGE ('2027-01-01')
+
+Q: You want to combine 2022 and 2023. Which command?
+A: MERGE RANGE ('2023-01-01')
+
+Q: Fastest way to archive old partition data?
+A: SWITCH PARTITION to archive table
+
+Q: RANGE RIGHT means what?
+A: Boundary date belongs to the newer (right) partition
+
+Q: What column decides which partition a row goes to?
+A: The PARTITION KEY column (TradeDate in our case)
+
+Q: 4 boundary values creates how many partitions?
+A: 5 partitions (always boundaries + 1)
+
+
+========================================
+11. ERRORS TO WATCH OUT FOR
+========================================
+
+-> Must create SCHEME before using in table
+-> Must create FUNCTION before creating SCHEME
+-> SWITCH requires archive table to have
+   EXACT same structure as source table
+-> Cannot MERGE if data exists in that partition
+   without moving data first
+
+
+========================================
+12. TOMORROW — DAY 7: TEMPORAL TABLES
+========================================
+
+Preview:
+-> System-versioned temporal tables
+-> Automatic history tracking
+-> "What was NABIL price on any past date?"
+-> FOR SYSTEM_TIME AS OF query
+-> Very exciting and useful for NEPSE!
+
+========================================
+CONFUSED ABOUT:
+(write anything that didn't click today)
+
+UNDERSTOOD WELL:
+(write what felt easy today)
+
+REAL WORLD CONNECTION:
+Partitioning = filing cabinet with one drawer per year.
+NEPSE trade data grows every day — partitioning keeps
+queries fast even after millions of rows.
+SWITCH = moving old files to storage room instantly
+without carrying them one by one.
+========================================
