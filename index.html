@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DBMS Exam Prep (Units 1-6)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<style>
+  :root{
+    --bg:#12161f;
+    --bg-panel:#171c27;
+    --bg-card:#1c2230;
+    --ink:#e7e5df;
+    --ink-dim:#9aa3b5;
+    --rule:#2a3140;
+    --amber:#e8a33d;
+    --teal:#4fd1c5;
+    --rose:#e2725b;
+    --violet:#a78bfa;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, Segoe UI, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.55;}
+
+  .shell{display:flex; min-height:100vh;}
+  .sidebar{
+    width:280px; flex-shrink:0; background:var(--bg-panel);
+    border-right:1px solid var(--rule); position:sticky; top:0; height:100vh;
+    overflow-y:auto; padding:22px 18px 40px;
+  }
+  .brand{font-family:var(--mono); font-size:13px; letter-spacing:.08em; color:var(--amber); text-transform:uppercase;}
+  .brand h1{font-family:var(--sans); font-size:20px; color:var(--ink); margin:6px 0 2px; letter-spacing:-0.01em;}
+  .brand p{margin:0; font-size:12.5px; color:var(--ink-dim);}
+
+  .coverage{margin:20px 0 22px; padding:14px; background:var(--bg-card); border:1px solid var(--rule); border-radius:10px;}
+  .coverage-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  .coverage-top span:first-child{font-size:12px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.06em;}
+  #coveragePct{font-family:var(--mono); color:var(--amber); font-size:18px; font-weight:600;}
+  .bar{height:8px; border-radius:5px; background:#0e1219; overflow:hidden; border:1px solid var(--rule);}
+  .bar-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--teal),var(--amber)); transition:width .35s ease;}
+  .coverage small{display:block; margin-top:8px; color:var(--ink-dim); font-size:11px;}
+
+  .search{
+    width:100%; padding:9px 12px; border-radius:8px; border:1px solid var(--rule);
+    background:#0e1219; color:var(--ink); font-family:var(--sans); font-size:13.5px; margin-bottom:18px;
+  }
+  .search:focus{outline:none; border-color:var(--teal);}
+
+  nav.toc a{
+    display:flex; justify-content:space-between; gap:8px;
+    padding:8px 10px; margin-bottom:3px; border-radius:7px; color:var(--ink-dim);
+    text-decoration:none; font-size:13.5px; transition:background .15s, color .15s;
+  }
+  nav.toc a:hover{background:#20273a; color:var(--ink);}
+  nav.toc a.active{background:#20273a; color:var(--teal);}
+  nav.toc .u-count{font-family:var(--mono); font-size:11px; color:var(--ink-dim);}
+
+  .main{flex:1; padding:40px 48px 120px; max-width:980px;}
+  header.hero{margin-bottom:36px; border-bottom:1px solid var(--rule); padding-bottom:26px;}
+  header.hero .eyebrow{font-family:var(--mono); color:var(--rose); font-size:12px; letter-spacing:.1em; text-transform:uppercase;}
+  header.hero h1{font-size:32px; margin:8px 0 10px; letter-spacing:-0.02em;}
+  header.hero p{color:var(--ink-dim); max-width:640px; margin:0 0 14px;}
+  .note-box{
+    background:#20180f; border:1px solid #4a3620; color:#f0c98a; border-radius:9px;
+    padding:12px 14px; font-size:13.5px; margin-top:14px;
+  }
+  .note-box b{color:var(--amber);}
+  .note-box.blue{background:#101c26; border-color:#1e3a4a; color:#8fd0e8;}
+  .note-box.blue b{color:var(--teal);}
+
+  .pattern-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px;}
+  .pattern-card{background:var(--bg-card); border:1px solid var(--rule); border-radius:10px; padding:16px 18px;}
+  .pattern-card h3{margin:0 0 6px; font-size:14px; color:var(--teal); font-family:var(--mono);}
+  .pattern-card p{margin:0; font-size:13px; color:var(--ink-dim);}
+
+  section.unit{margin-bottom:54px; scroll-margin-top:20px;}
+  .unit-head{display:flex; align-items:baseline; gap:14px; margin-bottom:6px;}
+  .unit-tag{font-family:var(--mono); color:var(--amber); font-size:13px;}
+  .unit-head h2{font-size:24px; margin:0; letter-spacing:-0.01em;}
+  .unit-meta{color:var(--ink-dim); font-size:13px; margin:0 0 22px;}
+
+  .qcard{
+    background:var(--bg-card); border:1px solid var(--rule); border-radius:12px;
+    margin-bottom:14px; overflow:hidden; scroll-margin-top:20px;
+  }
+  .qcard-head{
+    display:flex; align-items:flex-start; gap:12px; padding:15px 18px; cursor:pointer; user-select:none;
+  }
+  .qcard input[type=checkbox]{
+    margin-top:3px; width:17px; height:17px; accent-color:var(--teal); cursor:pointer; flex-shrink:0;
+  }
+  .qcard-head .qtext{flex:1; font-size:14.5px; color:var(--ink); font-weight:500;}
+  .qcard .rank{
+    flex-shrink:0; font-family:var(--mono); font-size:10px; padding:2px 8px; border-radius:99px;
+    letter-spacing:.04em; text-transform:uppercase; height:fit-content; margin-top:2px;
+  }
+  .rank.high{background:#2a1c14; color:var(--amber); border:1px solid #4a3620;}
+  .rank.med{background:#132726; color:var(--teal); border:1px solid #1f4340;}
+  .rank.low{background:#1c1f2a; color:var(--ink-dim); border:1px solid var(--rule);}
+  .rank.concept{background:#1e1a2e; color:var(--violet); border:1px solid #3a3060;}
+  .caret{flex-shrink:0; color:var(--ink-dim); transition:transform .2s ease; margin-top:2px;}
+  .qcard.open .caret{transform:rotate(90deg);}
+  .qcard-body{max-height:0; overflow:hidden; transition:max-height .25s ease; padding:0 18px; border-top:1px solid transparent;}
+  .qcard.open .qcard-body{max-height:3200px; border-top-color:var(--rule); padding:14px 18px 18px;}
+  .qcard-body p{margin:0 0 10px; font-size:13.8px; color:#cfd3dd;}
+  .qcard-body ul,.qcard-body ol{margin:0 0 10px; padding-left:20px; font-size:13.8px; color:#cfd3dd;}
+  .qcard-body li{margin-bottom:4px;}
+  .qcard-body pre{background:#0d1117; border:1px solid var(--rule); border-radius:8px; padding:12px 14px; overflow-x:auto; font-size:12.8px; margin:8px 0 4px;}
+  .qcard-body code{font-family:var(--mono);}
+  .qcard-body table{width:100%; border-collapse:collapse; font-size:13px; margin:8px 0;}
+  .qcard-body th,.qcard-body td{border:1px solid var(--rule); padding:6px 10px; text-align:left; color:#cfd3dd;}
+  .qcard-body th{color:var(--teal); font-family:var(--mono); font-size:11.5px; text-transform:uppercase;}
+
+  .hidden{display:none !important;}
+
+  .unit-toolbar{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+  .unit-toolbar button{
+    font-family:var(--sans); font-size:12.5px; padding:6px 12px; border-radius:7px;
+    background:#20273a; color:var(--ink-dim); border:1px solid var(--rule); cursor:pointer;
+  }
+  .unit-toolbar button:hover{color:var(--ink); border-color:var(--teal);}
+  .unit-toolbar button.accent{background:#132726; color:var(--teal); border-color:#1f4340;}
+
+  footer{border-top:1px solid var(--rule); padding-top:22px; margin-top:40px; color:var(--ink-dim); font-size:12.5px;}
+
+  ::-webkit-scrollbar{width:9px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:#2a3140; border-radius:5px;}
+
+  /* ---- SQL runner ---- */
+  .code-runner{border:1px solid var(--rule); border-radius:8px; overflow:hidden; margin:8px 0 4px;}
+  .code-runner pre{margin:0; border:none; border-radius:0;}
+  .code-runner-bar{display:flex; align-items:center; justify-content:space-between; gap:10px; background:#11151d; padding:6px 10px; border-bottom:1px solid var(--rule);}
+  .code-runner-bar span{font-family:var(--mono); font-size:11px; color:var(--ink-dim); letter-spacing:.04em;}
+  .code-runner-btns{display:flex; gap:8px; flex-shrink:0;}
+  .run-btn{font-family:var(--mono); font-size:11.5px; color:#0d1117; background:var(--teal); border:none; border-radius:5px; padding:5px 11px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;}
+  .run-btn:hover{background:#6fe0d4;}
+  .run-btn:disabled{background:#3a4150; color:var(--ink-dim); cursor:wait;}
+  .reset-btn{font-family:var(--mono); font-size:11.5px; color:var(--ink-dim); background:#20273a; border:1px solid var(--rule); border-radius:5px; padding:5px 11px; cursor:pointer;}
+  .reset-btn:hover{color:var(--ink); border-color:var(--teal);}
+  .code-editor{display:block; width:100%; background:#0d1117; color:#d4d4d8; font-family:var(--mono); font-size:12.8px; line-height:1.55; border:none; outline:none; padding:12px 14px; resize:vertical; tab-size:4; white-space:pre;}
+  .code-editor:focus{background:#0f141c; box-shadow:inset 0 0 0 1px var(--teal);}
+  .term-output{background:#080a0f; color:#8de08a; font-family:var(--mono); font-size:12.5px; padding:12px 14px; white-space:pre-wrap; word-break:break-word; border-top:1px solid var(--rule); max-height:320px; overflow:auto;}
+  .term-output.hidden{display:none;}
+  .term-output::before{content:"$ result"; display:block; color:#4a5568; margin-bottom:6px; font-size:10.5px; letter-spacing:.06em;}
+  .term-output table{border-collapse:collapse; font-size:12px; margin-top:4px;}
+  .term-output th,.term-output td{border:1px solid #1f2734; padding:4px 9px; color:#c7f0c6;}
+  .term-output th{color:var(--teal); background:#0d1420;}
+  .not-runnable-tag{font-family:var(--mono); font-size:10px; color:var(--ink-dim); background:#1c2230; border:1px solid var(--rule); padding:3px 8px; border-radius:5px;}
+
+  /* ---- Mobile topbar / off-canvas sidebar ---- */
+  .mobile-topbar{display:none;}
+  .sidebar-overlay{display:none;}
+
+  @media(max-width:860px){
+    .mobile-topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:70; background:var(--bg-panel);
+      border-bottom:1px solid var(--rule); padding:12px 16px;
+    }
+    .mobile-topbar .mt-title{font-family:var(--mono); font-size:13px; color:var(--amber); letter-spacing:.04em;}
+    .mobile-topbar button{background:#20273a; border:1px solid var(--rule); color:var(--ink); font-size:18px; line-height:1; padding:7px 11px; border-radius:7px; cursor:pointer;}
+    .shell{flex-direction:column;}
+    .sidebar{position:fixed; top:0; left:0; height:100vh; width:84%; max-width:320px; transform:translateX(-105%); transition:transform .25s ease; z-index:80; box-shadow:6px 0 30px rgba(0,0,0,.5);}
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-overlay{display:block; position:fixed; inset:0; background:rgba(5,7,11,.6); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:75;}
+    .sidebar-overlay.show{opacity:1; pointer-events:auto;}
+    .main{padding:24px 16px 90px;}
+    header.hero h1{font-size:25px;}
+    .pattern-grid{grid-template-columns:1fr;}
+    .qcard-head{flex-wrap:wrap; padding:13px 14px;}
+    .qcard-head .qtext{order:2; width:100%; margin-top:2px;}
+    .qcard .rank{order:3;}
+    .qcard input[type=checkbox]{order:1;}
+    .caret{order:4; margin-left:auto;}
+    .qcard-body{padding-left:14px; padding-right:14px;}
+    .qcard-body table{display:block; overflow-x:auto; white-space:nowrap;}
+    .unit-head h2{font-size:20px;}
+    .qcard-body pre, .term-output{font-size:12px;}
+  }
+  @media(max-width:420px){
+    .main{padding:18px 12px 90px;}
+    header.hero h1{font-size:21px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="mobile-topbar">
+  <span class="mt-title">DBMS · Exam Prep</span>
+  <button id="menuToggle" aria-label="Open menu">☰</button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">Database Management System</div>
+    <h1>Exam Prep Console</h1>
+    <p>Units 1, 2, 3, 4 &amp; 6</p>
+
+    <div class="coverage">
+      <div class="coverage-top">
+        <span>Coverage</span>
+        <span id="coveragePct">0%</span>
+      </div>
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+      <small id="coverageCount">0 of 0 topics reviewed</small>
+    </div>
+
+    <input class="search" id="searchBox" type="text" placeholder="Search a topic or keyword…">
+
+    <nav class="toc" id="tocNav">
+      <a href="#overview">Overview</a>
+      <a href="#unit1">Unit 1 · Intro to Database <span class="u-count">8</span></a>
+      <a href="#unit2">Unit 2 · DB System Concepts <span class="u-count">5</span></a>
+      <a href="#unit3">Unit 3 · ER Model <span class="u-count">11</span></a>
+      <a href="#unit4">Unit 4 · Relational Model <span class="u-count">7</span></a>
+      <a href="#unit6">Unit 6 · Normalization <span class="u-count">7</span></a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <header class="hero" id="overview">
+      <div class="eyebrow">Second Semester · BDS</div>
+      <h1>Everything for Units 1–6, in one place</h1>
+      <p>Every assignment question answered in full, plus every core concept from your unit slides (schema architecture, ER diagrams, keys and constraints, normal forms) that wasn't in the assignment sheets but is fair game for the exam. A couple of the trickier normalization and constraint examples are runnable right on the page: edit the query and hit Run to see it execute for real.</p>
+      <div class="note-box">
+        <b>Source note:</b> built from Assignment-1 (Unit 1/2), Assignment-2 (Unit 3/4), Assignment-3 (Unit 6), and the Unit-1/3/4/6 slide decks. No past DBMS exam paper was provided this time, so questions are organized by topic rather than by exam pattern.
+      </div>
+      <div class="note-box blue">
+        <b>Runnable examples:</b> a couple of SQL snippets below run for real in your browser using SQLite (via sql.js). Edit the query in the box and hit Run to see live results.
+      </div>
+
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <h3>Units 1–2</h3>
+          <p>DBMS fundamentals, architecture, schema levels, database languages: mostly definition-style questions.</p>
+        </div>
+        <div class="pattern-card">
+          <h3>Units 3–4</h3>
+          <p>ER modelling and the relational model: heaviest units, expect diagram + theory questions.</p>
+        </div>
+        <div class="pattern-card">
+          <h3>Units 5–6</h3>
+          <p>SQL practicals and normalization: the most "hands-on" part, practice running queries and spotting anomalies.</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ UNIT 1 ============ -->
+    <section class="unit" id="unit1">
+      <div class="unit-head"><span class="unit-tag">01</span><h2>Introduction to Database and Database Users</h2></div>
+      <p class="unit-meta">2 hrs · What a database/DBMS is, database approach, actors, architecture</p>
+      <div class="unit-toolbar">
+        <button onclick="expandUnit('unit1',true)">Expand all</button>
+        <button onclick="expandUnit('unit1',false)">Collapse all</button>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Define data, database, DBMS, database system, database catalog</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <ul>
+            <li><b>Data:</b> raw facts and figures with no particular meaning on their own (e.g. "John", "25", "Kathmandu").</li>
+            <li><b>Database:</b> a shared, integrated collection of logically related data designed to meet the information needs of an organization.</li>
+            <li><b>DBMS:</b> a computerized system software that lets users define, create, maintain, and control access to a database (examples: MySQL, Oracle, PostgreSQL, MongoDB, SQL Server).</li>
+            <li><b>Database system:</b> the DBMS + the database + application programs + the users, working together as a whole.</li>
+            <li><b>Database catalog:</b> the system-level store of metadata, the database's own self-description (table structures, data types, constraints) that the DBMS consults before executing operations.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: What is a DBMS? Architecture diagram &amp; data independence</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>DBMS:</b> software that bridges the gap between raw stored data and meaningful information, while ensuring efficiency, security, and integrity of that data.</p>
+          <p><b>Database System Environment</b> has five components you can draw as a diagram:</p>
+          <table>
+            <tr><th>Component</th><th>Description</th><th>Example</th></tr>
+            <tr><td>Hardware</td><td>Physical devices</td><td>Servers, storage disks, terminals</td></tr>
+            <tr><td>Software</td><td>DBMS + OS + network software</td><td>MySQL, Windows/Linux</td></tr>
+            <tr><td>Data</td><td>Stored raw facts + metadata</td><td>Customer table, index files</td></tr>
+            <tr><td>Procedures</td><td>Instructions for using the DBMS</td><td>Backup policy, login protocol</td></tr>
+            <tr><td>People</td><td>All users involved</td><td>DBA, developers, end-users</td></tr>
+          </table>
+          <p><b>Data independence:</b> the ability to change the schema at one level of the database without having to change the schema at the next higher level: this is exactly what the three-schema architecture (Unit 2) is built to provide.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Characteristics of the database approach</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <table>
+            <tr><th>#</th><th>Characteristic</th><th>Explanation</th></tr>
+            <tr><td>1</td><td>Self-describing nature</td><td>The DB contains both data and metadata (system catalog)</td></tr>
+            <tr><td>2</td><td>Insulation between program &amp; data</td><td>Program-data independence: storage changes don't require program changes</td></tr>
+            <tr><td>3</td><td>Data abstraction</td><td>Users see a conceptual view, not physical storage details</td></tr>
+            <tr><td>4</td><td>Support of multiple views</td><td>Different users see different subsets/representations of the data</td></tr>
+            <tr><td>5</td><td>Data sharing &amp; multi-user transactions</td><td>Concurrent access with concurrency control (ACID properties)</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Database schema &amp; functions of a Database Administrator</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Database schema:</b> the overall logical structure/description of the database, the "blueprint" (e.g. "Student has attributes RollNo: int, Name: string"). It's relatively static, unlike the actual data (instance), which changes constantly.</p>
+          <p><b>Functions of a DBA:</b> authorizing access to the database, tuning performance, taking backups, handling recovery after failure, and defining/maintaining the schema.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Centralized vs Client/Server architecture (with example)</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Centralized architecture:</b> mainframe computers handle all processing: user applications, the interface, and DBMS functions all run in one location. Terminals just send keystrokes and receive screen output. Single point of control and failure.</p>
+          <p><b>Client/Server architecture</b> splits work across tiers:</p>
+          <table>
+            <tr><th>Tier</th><th>Description</th><th>Example</th></tr>
+            <tr><td>1-Tier</td><td>Client, server, and database all in one application, no network needed</td><td>MS Access</td></tr>
+            <tr><td>2-Tier</td><td>Client application talks directly to the database server, via ODBC/JDBC</td><td>Library management system in a school</td></tr>
+            <tr><td>3-Tier</td><td>Client → application server → database server; the client never talks to the DB directly</td><td>E-commerce store (checks stock, applies discounts, then hits the DB)</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Flat-file system &amp; advantages of the DBMS approach</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Flat-file system:</b> a data storage method where each application maintains its own separate data files (often plain text or simple records) with no central management, no relationships between files, and no shared query language, the traditional pre-DBMS approach.</p>
+          <p><b>DBMS vs File System</b></p>
+          <table>
+            <tr><th>Feature</th><th>File System</th><th>DBMS</th></tr>
+            <tr><td>Data redundancy</td><td>High</td><td>Controlled</td></tr>
+            <tr><td>Data sharing</td><td>Poor</td><td>Excellent</td></tr>
+            <tr><td>Security</td><td>Minimal</td><td>Robust</td></tr>
+            <tr><td>Concurrent access</td><td>Not supported</td><td>Fully supported</td></tr>
+            <tr><td>Backup/recovery</td><td>Manual</td><td>Automated</td></tr>
+            <tr><td>Query language</td><td>None</td><td>SQL</td></tr>
+            <tr><td>Program-data independence</td><td>No</td><td>Yes</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Data abstraction, data model, schemas, instances, database state</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <ul>
+            <li><b>Data abstraction:</b> hiding the complex physical storage details from users, exposing only a simplified conceptual view.</li>
+            <li><b>Data model:</b> a set of concepts/tools for describing data, relationships, constraints, and semantics of a database.</li>
+            <li><b>Schema:</b> the static logical structure/description of the database (the "intension").</li>
+            <li><b>Instance:</b> the actual data stored at a given moment (the "extension"): changes frequently.</li>
+            <li><b>Database state:</b> the collection of all instances/data in the database at a particular point in time; every update moves the database from one valid state to another.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Actors on the scene &amp; workers behind the scene</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Actors on the scene</b> (directly use the DB):</p>
+          <table>
+            <tr><th>Role</th><th>Responsibility</th></tr>
+            <tr><td>DBA</td><td>Authorizes access, tunes performance, backups/recovery, schema definition</td></tr>
+            <tr><td>Database Designers</td><td>Identify data/constraints, create logical &amp; physical schema</td></tr>
+            <tr><td>Casual end users</td><td>Occasional access (e.g. managers reading reports)</td></tr>
+            <tr><td>Naive/Parametric users</td><td>Constantly run canned transactions (e.g. bank tellers)</td></tr>
+            <tr><td>Sophisticated users</td><td>Use advanced tools (data analysts, scientists)</td></tr>
+            <tr><td>Standalone users</td><td>Use a personal database (e.g. local spreadsheet-backed DB)</td></tr>
+            <tr><td>System analysts &amp; app programmers</td><td>Determine requirements, build software interfaces</td></tr>
+          </table>
+          <p><b>Workers behind the scene</b> (support the DBMS but don't use the DB directly): DBMS designers/implementers who build the DBMS software itself, tool developers who build design/reporting/monitoring tools, and operators/maintenance staff who run the hardware and network.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ UNIT 2 ============ -->
+    <section class="unit" id="unit2">
+      <div class="unit-head"><span class="unit-tag">02</span><h2>Database System Concepts</h2></div>
+      <p class="unit-meta">4 hrs · Data models, three-schema architecture, DB languages, interfaces, classification</p>
+      <div class="unit-toolbar">
+        <button onclick="expandUnit('unit2',true)">Expand all</button>
+        <button onclick="expandUnit('unit2',false)">Collapse all</button>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Data models, schema vs instance</span>
+          <span class="rank high">Guaranteed</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Data model:</b> a set of concepts/tools to describe data, relationships, constraints, and semantics. Types: <b>high-level/conceptual</b> (e.g. ER model), <b>low-level/physical</b> (record formats, pointers), <b>representational/implementation</b> (relational, network, object-oriented).</p>
+          <table>
+            <tr><th>Feature</th><th>Schema</th><th>Instance</th></tr>
+            <tr><td>Nature</td><td>Definition / blueprint</td><td>Data / state</td></tr>
+            <tr><td>Change frequency</td><td>Rare</td><td>Frequent (insert/update/delete)</td></tr>
+            <tr><td>Analogy</td><td>A Java class</td><td>A Java object</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">ANSI/SPARC three-schema architecture (with diagram description)</span>
+          <span class="rank high">Guaranteed</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p>The Three-Schema Architecture, proposed by the ANSI/SPARC committee, separates a database into three layers to achieve flexibility, abstraction, and data independence. When asked to draw it, sketch three stacked boxes labelled External → Conceptual → Internal, top to bottom.</p>
+          <ol>
+            <li><b>External Schema (View level):</b> tailored views for different user groups; hides irrelevant details. Example: a customer sees only their balance, while a manager sees full financial reports.</li>
+            <li><b>Conceptual Schema (Logical level):</b> the single logical structure of the entire database, hiding physical storage. Example: defines entities like Customer and Account with attributes/relationships.</li>
+            <li><b>Internal Schema (Physical level):</b> the actual physical storage: file structures, indexes, compression, hashing.</li>
+          </ol>
+          <p><b>Data independence it provides:</b></p>
+          <ul>
+            <li><b>Logical independence:</b> changes to the conceptual schema don't affect external schemas (e.g. adding a DOB column doesn't break users who don't need it): harder to achieve.</li>
+            <li><b>Physical independence:</b> changes to the internal schema don't affect the conceptual schema (e.g. switching from sequential file to B+ tree index: users still query the same way): easier to achieve.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Database languages: DDL, DML, DCL, TCL</span>
+          <span class="rank high">Guaranteed</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <table>
+            <tr><th>Language</th><th>Purpose</th><th>Commands</th></tr>
+            <tr><td>DDL</td><td>Define/modify schema</td><td>CREATE, ALTER, DROP, TRUNCATE, RENAME</td></tr>
+            <tr><td>DML</td><td>Manipulate data</td><td>SELECT, INSERT, UPDATE, DELETE, MERGE, CALL</td></tr>
+            <tr><td>DCL</td><td>Manage privileges</td><td>GRANT, REVOKE</td></tr>
+            <tr><td>TCL</td><td>Manage transactions</td><td>COMMIT, ROLLBACK</td></tr>
+          </table>
+          <p>Full detail and runnable examples for these are in <b>Unit 5</b> below.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">DBMS interfaces</span>
+          <span class="rank med">Common</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <ul>
+            <li><b>Menu-based:</b> guided options for web/browsing users (dropdown menus)</li>
+            <li><b>Forms-based:</b> users fill a form to input/request data</li>
+            <li><b>GUI:</b> visual diagrams of tables/relationships, click-and-drag interaction</li>
+            <li><b>Natural language:</b> users type/ask questions in plain language, system interprets into a query</li>
+            <li><b>Speech input/output:</b> hands-free voice interaction</li>
+            <li><b>DBA interfaces:</b> specialized privileged commands for admin tasks (creating accounts, tuning settings)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Classification of DBMS</span>
+          <span class="rank high">Guaranteed</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>By data model:</b> Relational (MySQL, Oracle), Object-Oriented (db4o), Hierarchical (IBM IMS), Network (IDMS), NoSQL (document: MongoDB, key-value: Redis, column-family: Cassandra, graph: Neo4j).</p>
+          <p><b>By user support:</b> Single-user (SQLite for writing) vs Multi-user (PostgreSQL).</p>
+          <p><b>By distribution:</b> Centralized (one server) vs Distributed/DDBMS (data spread across locations: homogeneous = same DBMS everywhere, heterogeneous = mixed DBMS software with middleware).</p>
+          <p><b>By cost:</b> Open-source (MySQL, PostgreSQL) vs Commercial (Oracle).</p>
+          <p><b>By purpose:</b> General-purpose (SQL Server) vs Special-purpose (optimized for streaming/real-time data).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ UNIT 3 ============ -->
+    <section class="unit" id="unit3">
+      <div class="unit-head"><span class="unit-tag">03</span><h2>Data Modelling using ER Model</h2></div>
+      <p class="unit-meta">7 hrs · Heaviest unit: ER diagrams, attributes, keys, cardinality, generalization</p>
+      <div class="unit-toolbar">
+        <button onclick="expandUnit('unit3',true)">Expand all</button>
+        <button onclick="expandUnit('unit3',false)">Collapse all</button>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Entity type/entity set + ER diagram for an airline ticket booking system</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Entity type:</b> a category/template describing a group of similar objects (e.g. "Customer"). <b>Entity set:</b> the actual collection of entities of that type at a moment in time (e.g. all current customers).</p>
+          <p><b>Airline ticket booking ER sketch</b>: entities and attributes to draw:</p>
+          <ul>
+            <li><b>Customer</b>(cust_id [PK], name, visit_count): visit_count supports the "filter frequent visitors" requirement</li>
+            <li><b>Ticket</b>(ticket_no [PK], flight_no, price, booking_date)</li>
+            <li><b>Flight</b>(flight_no [PK], source, destination, departure_time)</li>
+            <li><b>Discount</b>(discount_id [PK], min_tickets, percentage): used to apply bulk-buy discounts</li>
+            <li>Relationships: Customer <i>Books</i> Ticket (1:N, meaning one customer books many tickets), Ticket <i>For</i> Flight (N:1), Customer <i>Eligible For</i> Discount (based on ticket count)</li>
+          </ul>
+          <p>Draw each entity as a rectangle, attributes as ovals connected to their entity, and relationships as diamonds connecting the related entities, with cardinality labels (1, N) on the connecting lines.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Referential integrity: what and why</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Referential integrity:</b> a constraint enforced when a foreign key references the primary key of another relation: every foreign key value must either match an existing primary key value in the referenced table, or be NULL.</p>
+          <p><b>Why needed:</b> it prevents "orphan" records: e.g. a Student row pointing to a Department that doesn't exist: keeping relationships between tables logically consistent. Full detail (violation causes, cascade/restrict/set-null handling) is covered under Unit 4.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Relational database, characteristics of a relation, domain constraint</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Relational database:</b> a database organized as a collection of relations (tables), each with rows (tuples) and columns (attributes), where relationships between tables are represented through shared key values rather than physical pointers.</p>
+          <p><b>Characteristics of a relation:</b> no duplicate tuples, tuples are unordered, attributes are unordered, all values are atomic (1NF), and every attribute has a distinct name.</p>
+          <p><b>Domain constraint:</b> specifies that every value taken by an attribute must come from that attribute's defined domain (set of atomic allowable values), e.g. an Age column must contain integers, not text.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: ER diagram for online course registration</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <ul>
+            <li><b>Student</b>(student_id [PK], name, email)</li>
+            <li><b>Course</b>(course_id [PK], title, credit_hours)</li>
+            <li><b>Registration</b>: a relationship (many-to-many) between Student and Course, carrying its own attribute <i>registration_date</i>, since a student registers for many courses and a course has many students</li>
+          </ul>
+          <p>Draw Student and Course as rectangles, "Registers" as a diamond between them with an M:N cardinality label, and registration_date as an attribute attached to the relationship diamond itself (since it depends on the student-course pair, not on either entity alone).</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Components of ER diagram, symbols, ER diagram for a library</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p>An ER diagram has three main components:</p>
+          <ol>
+            <li><b>Entity sets</b>: rectangle (single = strong entity with its own PK, double rectangle = weak entity with no PK of its own)</li>
+            <li><b>Attributes</b>: ovals attached to entities (see attribute types card below)</li>
+            <li><b>Relationship sets</b>: diamond (single = strong relationship between two strong entities, double diamond = identifying relationship involving a weak entity)</li>
+          </ol>
+          <p><b>Library ER sketch:</b></p>
+          <ul>
+            <li><b>Book</b>(isbn [PK], title, author, copies_available)</li>
+            <li><b>Member</b>(member_id [PK], name, contact)</li>
+            <li><b>Issue</b>: relationship between Book and Member with attributes issue_date, due_date (M:N: a member can issue many books over time, a book can be issued to many members over time)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Integrity and its types</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Integrity:</b> the overall correctness, consistency, and accuracy of data in a database, enforced through rules/constraints the DBMS checks automatically.</p>
+          <p><b>Types:</b> domain integrity (values must come from the correct domain), entity integrity (no primary key attribute can be NULL), referential integrity (foreign keys must match an existing primary key or be NULL), key integrity/uniqueness (primary key values must be unique), and user-defined/semantic integrity (business rules, e.g. salary must be positive).</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Attribute types (simple, composite, single/multi-valued, derived, key)</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <ul>
+            <li><b>Simple:</b> can't be divided further (e.g. Age)</li>
+            <li><b>Composite:</b> made of smaller sub-attributes (e.g. Name → First + Last)</li>
+            <li><b>Single-valued:</b> holds exactly one value per entity (e.g. DOB)</li>
+            <li><b>Multi-valued:</b> can hold several values per entity (e.g. Phone_no, Email: drawn with a double oval)</li>
+            <li><b>Derived:</b> computed from another attribute (e.g. Age derived from DOB: drawn with a dashed oval)</li>
+            <li><b>Key attribute:</b> uniquely identifies each entity in the set (e.g. Roll_no)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Participation constraints, cardinality ratios, relationship degree</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Participation constraint</b>, the minimum number of relationship instances an entity must take part in: <b>partial</b> (single line, meaning participation is optional) vs <b>total</b> (double line, meaning every entity instance must participate).</p>
+          <p><b>Cardinality ratio</b>: the maximum number of relationship instances an entity can have:</p>
+          <table>
+            <tr><th>Ratio</th><th>Meaning</th><th>Example</th></tr>
+            <tr><td>1:1</td><td>At most one on each side</td><td>Person: Passport</td></tr>
+            <tr><td>1:N</td><td>One on one side, many on the other</td><td>Department: Employees</td></tr>
+            <tr><td>N:1</td><td>Many on one side, one on the other (same as 1:N, reversed direction)</td><td>Employees: Department</td></tr>
+            <tr><td>M:N</td><td>Many on both sides</td><td>Student: Course</td></tr>
+          </table>
+          <p><b>Degree of a relationship set</b> = number of entity sets participating: <b>unary</b> (1: e.g. "married to" within Person), <b>binary</b> (2: most common, e.g. Student enrolled in Course), <b>ternary</b> (3), <b>n-ary</b> (n entities).</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Specialization and Generalization</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Generalization:</b> forming a generalized superclass by extracting common characteristics from two or more classes (bottom-up). Example: Car and Motorcycle → generalized to Vehicle.</p>
+          <p><b>Specialization:</b> the reverse: dividing a superclass into subclasses based on distinguishing characteristics (top-down). Example: Employee → Engineer, Manager, Technician.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Traditional data models (Hierarchical, Network, Relational, Object-based)</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <table>
+            <tr><th>Model</th><th>Structure</th><th>Limitation</th><th>Example</th></tr>
+            <tr><td>Hierarchical</td><td>Tree: each child has exactly one parent</td><td>Many-to-many hard to represent</td><td>IBM IMS</td></tr>
+            <tr><td>Network</td><td>Graph: child can have multiple parents (owners)</td><td>Complex to design/modify</td><td>IDMS</td></tr>
+            <tr><td>Relational</td><td>Tables with rows/columns; relationships via key values</td><td>None</td><td>MySQL, PostgreSQL, Oracle</td></tr>
+            <tr><td>Object-based</td><td>Objects, classes, inheritance, encapsulation</td><td>Less mature tooling/ecosystem</td><td>PostgreSQL (object-relational)</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Strong vs weak entity sets, strong vs weak relationship sets</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Strong entity set:</b> has its own primary key; drawn as a single rectangle. <b>Weak entity set:</b> has no primary key of its own and depends on a strong (owner) entity for identification; drawn as a double rectangle.</p>
+          <p><b>Strong relationship set:</b> connects two strong entity sets; drawn as a single diamond. <b>Weak/identifying relationship set:</b> connects a strong entity to a weak entity; drawn as a double diamond.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ UNIT 4 ============ -->
+    <section class="unit" id="unit4">
+      <div class="unit-head"><span class="unit-tag">04</span><h2>Relational Data Model and Constraints</h2></div>
+      <p class="unit-meta">5 hrs · Relations, keys, constraints, referential integrity: heavy on definitions with examples</p>
+      <div class="unit-toolbar">
+        <button onclick="expandUnit('unit4',true)">Expand all</button>
+        <button onclick="expandUnit('unit4',false)">Collapse all</button>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Relational model concepts: relation, tuple, attribute, domain, degree, cardinality</span>
+          <span class="rank high">Guaranteed</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <table>
+            <tr><th>Term</th><th>Definition</th></tr>
+            <tr><td>Relation</td><td>A table with rows and columns</td></tr>
+            <tr><td>Tuple</td><td>A row in a relation (one entity instance)</td></tr>
+            <tr><td>Attribute</td><td>A column in a relation (one property)</td></tr>
+            <tr><td>Domain</td><td>The set of allowable values for an attribute</td></tr>
+            <tr><td>Degree</td><td>Number of attributes in a relation</td></tr>
+            <tr><td>Cardinality</td><td>Number of tuples in a relation</td></tr>
+          </table>
+          <p><b>Characteristics of relations:</b> no duplicate tuples, tuples are unordered, attributes are unordered, all values are atomic (no nested relations: 1NF), and every attribute has a distinct name.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Types of relational constraints (domain, tuple uniqueness, key, entity integrity, referential integrity)</span>
+          <span class="rank high">Guaranteed</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <table>
+            <tr><th>Constraint</th><th>Rule</th></tr>
+            <tr><td>Domain constraint</td><td>Each attribute's value must come from its defined domain (e.g. Age must be an integer)</td></tr>
+            <tr><td>Tuple uniqueness</td><td>No two tuples in a relation may be identical</td></tr>
+            <tr><td>Key constraint</td><td>Primary key values must be unique and never null</td></tr>
+            <tr><td>Entity integrity</td><td>No attribute that is part of the primary key can be null (applies to every component of a composite key too)</td></tr>
+            <tr><td>Referential integrity</td><td>Foreign key values must match an existing primary key value in the referenced relation, or be null</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Keys in DBMS: all 10 types</span>
+          <span class="rank high">Guaranteed</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p>A <b>key</b> is a set of attributes that can uniquely identify each tuple in a relation.</p>
+          <table>
+            <tr><th>Key</th><th>Meaning</th></tr>
+            <tr><td>Super key</td><td>Any set of attributes that uniquely identifies a tuple (no restriction on size)</td></tr>
+            <tr><td>Candidate key</td><td>A minimal super key: remove any attribute and it stops being unique</td></tr>
+            <tr><td>Primary key</td><td>The candidate key chosen by the designer; never null, never changes, only one per relation</td></tr>
+            <tr><td>Alternate key</td><td>Candidate keys not chosen as the primary key</td></tr>
+            <tr><td>Foreign key</td><td>An attribute whose values must match the primary key values of another (or the same) relation</td></tr>
+            <tr><td>Partial key</td><td>Identifies a bunch of related tuples but not each one uniquely (used with weak entities)</td></tr>
+            <tr><td>Composite key</td><td>A primary key made of more than one attribute</td></tr>
+            <tr><td>Unique key</td><td>Unique across all rows, non-updatable, but may be null</td></tr>
+            <tr><td>Surrogate key</td><td>Unique, updatable, and can never be null (often an artificial ID)</td></tr>
+            <tr><td>Secondary key</td><td>Used purely for faster indexing/searching, not for uniqueness</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Referential integrity violations &amp; how they're handled</span>
+          <span class="rank high">Guaranteed</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p>Three causes of violation:</p>
+          <ol>
+            <li><b>Insertion into the referencing relation</b>: inserting a foreign key value that doesn't exist in the referenced relation's primary key</li>
+            <li><b>Deletion from the referenced relation</b>: deleting a row whose key value is still used by the referencing relation</li>
+            <li><b>Update of the referenced relation</b>: changing a primary key value that's still referenced elsewhere</li>
+          </ol>
+          <p>For deletion/update, three handling strategies:</p>
+          <ul>
+            <li><b>Cascade</b>: automatically delete/update the matching rows in the referencing relation too</li>
+            <li><b>Restrict</b>: reject/abort the delete or update if it's still referenced</li>
+            <li><b>Set null</b>: set the referencing foreign key to NULL instead</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Null value constraints</span>
+          <span class="rank med">Common</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p>A <b>null</b> represents the absence of a value: it is not the same as zero, blank, or an empty string. It can mean the value is <i>unknown</i> (exists but not recorded yet) or <i>not applicable</i> (doesn't make sense for this tuple, e.g. SpouseName for an unmarried person).</p>
+          <pre><code class="language-sql" data-runnable="true">CREATE TABLE demo_student (
+  StudentID INTEGER NOT NULL,
+  Name TEXT NOT NULL,
+  Email TEXT               -- NULL allowed here
+);
+INSERT INTO demo_student VALUES (1, 'Ram', NULL);
+SELECT * FROM demo_student;</code></pre>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Relation schema, relational database, relational database schema</span>
+          <span class="rank low">Quick</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <ul>
+            <li><b>Relation schema:</b> the logical definition of one relation: name + attributes + constraints. e.g. <code>Student(StudentID: INT, Name: VARCHAR(50), Major: VARCHAR(4))</code></li>
+            <li><b>Relational database:</b> a collection of normalized relations with distinct names, e.g. {Student, Course, Enrollment}.</li>
+            <li><b>Relational database schema:</b> the set of all relation schemas plus all the integrity constraints across them.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Relational model notation</span>
+          <span class="rank low">Quick</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <table>
+            <tr><th>Notation</th><th>Meaning</th></tr>
+            <tr><td>R(A1, A2, ..., An)</td><td>Relation schema R with attributes A1 to An</td></tr>
+            <tr><td>r(R)</td><td>A relation instance of schema R</td></tr>
+            <tr><td>t[A]</td><td>Value of tuple t for attribute A</td></tr>
+            <tr><td>t[Ai, Aj]</td><td>Sub-tuple with just attributes Ai and Aj</td></tr>
+            <tr><td>π A1,A2 (R)</td><td>Projection: relational algebra operator selecting only certain columns</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============ UNIT 6 ============ -->
+    <section class="unit" id="unit6">
+      <div class="unit-head"><span class="unit-tag">06</span><h2>Functional Dependencies and Normalization</h2></div>
+      <p class="unit-meta">6 hrs · Anomalies, functional dependencies, 1NF–4NF, decomposition properties</p>
+      <div class="unit-toolbar">
+        <button onclick="expandUnit('unit6',true)">Expand all</button>
+        <button onclick="expandUnit('unit6',false)">Collapse all</button>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Informal design guidelines for relational schemas</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <ol>
+            <li><b>Semantic clarity:</b> each tuple should represent one real-world entity/relationship: don't mix unrelated entities in one relation.</li>
+            <li><b>Reduce redundancy:</b> minimize duplicate data to save space and avoid inconsistencies.</li>
+            <li><b>Simplicity:</b> keep the number of attributes per relation manageable.</li>
+            <li><b>Avoid nulls:</b> minimize null values, especially in foreign keys/mandatory fields: lots of nulls usually means the attribute belongs in a different relation.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Why functional dependencies? Explain 2NF and 3NF with example</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Why FDs matter:</b> a functional dependency X → Y means that if two tuples agree on X, they must also agree on Y: "X determines Y". FDs are the formal foundation for detecting redundancy and deciding how to normalize a relation, since normal forms are literally defined in terms of which FDs are/aren't allowed.</p>
+          <p><b>2NF:</b> a relation is in 2NF if it's already in 1NF and has <i>no partial dependency</i>: no non-prime attribute depends on only part of a composite candidate key.</p>
+          <pre><code class="language-sql" data-runnable="true">-- Example: StudentCourse(StudentID, CourseID, StudentName, CourseName, Grade)
+-- Primary key = (StudentID, CourseID)
+-- StudentName depends only on StudentID, CourseName only on CourseID -> partial dependency, violates 2NF
+
+-- Fix: split into three 2NF tables
+CREATE TABLE student(StudentID INTEGER PRIMARY KEY, StudentName TEXT);
+CREATE TABLE course(CourseID INTEGER PRIMARY KEY, CourseName TEXT);
+CREATE TABLE enrollment(StudentID INTEGER, CourseID INTEGER, Grade TEXT,
+  PRIMARY KEY(StudentID, CourseID));
+
+INSERT INTO student VALUES (1,'Ram'),(2,'Sita');
+INSERT INTO course VALUES (10,'DBMS'),(20,'Python');
+INSERT INTO enrollment VALUES (1,10,'A'),(1,20,'B+'),(2,10,'A+');
+
+SELECT s.StudentName, c.CourseName, e.Grade
+FROM enrollment e
+JOIN student s ON s.StudentID = e.StudentID
+JOIN course c ON c.CourseID = e.CourseID;</code></pre>
+          <p><b>3NF:</b> a relation is in 3NF if it's already in 2NF and has <i>no transitive dependency</i> for non-prime attributes: no non-prime attribute depends on another non-prime attribute. Example: StaffNo → BranchNo and BranchNo → BranchAddress means StaffNo → BranchAddress transitively; fix by moving BranchAddress into a separate Branch table keyed on BranchNo.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Assignment: Benefits of using normalization</span>
+          <span class="rank high">Assignment Q</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <ul>
+            <li>Eliminates data redundancy, saving storage space</li>
+            <li>Prevents insertion, update, and deletion anomalies</li>
+            <li>Improves data consistency and integrity</li>
+            <li>Makes the database easier to maintain and extend</li>
+            <li>Produces a cleaner, more logical schema aligned with real-world entities</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Anomalies: insertion, update, deletion</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p>Anomalies happen when a poorly normalized table forces inconsistent or incomplete data handling.</p>
+          <ul>
+            <li><b>Insertion anomaly:</b> can't add a valid new fact because unrelated data is also required. Example: can't add a new course with no students yet, because the table also demands student info.</li>
+            <li><b>Update anomaly:</b> the same fact is stored in multiple rows, so an update must touch every row: miss one and the data becomes inconsistent (e.g. two different instructors shown for the same course).</li>
+            <li><b>Deletion anomaly:</b> deleting one fact accidentally destroys another. Example: deleting the last student enrolled in a course also wipes out the course's own details.</li>
+          </ul>
+          <p><b>Causes:</b> data redundancy, lack of normalization, poor design (unrelated entities combined), missing relationships/foreign keys, and partial/transitive dependencies.</p>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Normal forms: 1NF, 2NF, 3NF, BCNF, 4NF</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <table>
+            <tr><th>Form</th><th>Rule</th></tr>
+            <tr><td>1NF</td><td>Every cell holds a single atomic value (no repeating groups/multi-valued cells)</td></tr>
+            <tr><td>2NF</td><td>1NF + no partial dependency (non-prime attribute depending on only part of a composite key)</td></tr>
+            <tr><td>3NF</td><td>2NF + no transitive dependency for non-prime attributes</td></tr>
+            <tr><td>BCNF</td><td>3NF + for every non-trivial FD A→B, A must be a super key (stricter than 3NF)</td></tr>
+            <tr><td>4NF</td><td>BCNF + no non-trivial multivalued dependencies (e.g. splitting a user's multiple phone numbers and multiple emails into separate tables instead of one combined table)</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Full, partial, and transitive functional dependency</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <ul>
+            <li><b>Full functional dependency:</b> B depends on the entire candidate key, not just part of it. Example: in StudentCourse(StudentID, CourseID → Grade), Grade genuinely needs both attributes together.</li>
+            <li><b>Partial dependency:</b> a non-prime attribute depends on only part of a composite candidate key. Example: in (StaffNo, StaffName) → BranchNo, StaffNo alone already determines BranchNo, so StaffName wasn't needed: that's partial.</li>
+            <li><b>Transitive dependency:</b> A → B → C implies A → C indirectly, where A is not a super key and C is non-prime. Example: StaffNo → BranchNo and BranchNo → BranchAddress gives StaffNo → BranchAddress transitively.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qcard" data-q>
+        <div class="qcard-head" onclick="toggle(this)">
+          <input type="checkbox" onclick="event.stopPropagation(); saveProgress()">
+          <span class="qtext">Concept: Decomposition properties: lossless join &amp; dependency preservation</span>
+          <span class="rank concept">Slide concept</span>
+          <span class="caret">▸</span>
+        </div>
+        <div class="qcard-body">
+          <p><b>Decomposition:</b> splitting one relation into two or more sub-relations. Every decomposition should ideally satisfy:</p>
+          <ul>
+            <li><b>Lossless join:</b> joining the sub-relations back together (natural join) reproduces exactly the original relation, with no missing or extra (spurious) tuples. Condition: R1 ⋈ R2 = R.</li>
+            <li><b>Dependency preservation:</b> none of the original relation's functional dependencies are lost: each sub-relation still enforces the FDs that applied to it in the original.</li>
+          </ul>
+          <p>A decomposition that fails the lossless condition (R1 ⋈ R2 ⊃ R, producing extra rows) is called a <b>lossy join decomposition</b> and introduces spurious tuples: this is exactly what normalization tries to avoid when splitting tables.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Built from Assignment-1 (Unit 1/2), Assignment-2 (Unit 3/4), Assignment-3 (Unit 6), and the Unit-1/3/4/6 slide decks. Check off each item as you can explain it without looking; aim for 100% coverage before the exam.
+    </footer>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<script>
+  hljs.highlightAll();
+
+  function toggle(headEl){
+    headEl.parentElement.classList.toggle('open');
+  }
+  function expandUnit(unitId, open){
+    document.querySelectorAll('#' + unitId + ' .qcard').forEach(c=>{
+      c.classList.toggle('open', open);
+    });
+  }
+
+  /* ---------- Mobile off-canvas menu ---------- */
+  const sidebarEl = document.querySelector('.sidebar');
+  const overlayEl = document.getElementById('sidebarOverlay');
+  const menuBtn = document.getElementById('menuToggle');
+  function closeDrawer(){
+    sidebarEl.classList.remove('open');
+    overlayEl.classList.remove('show');
+  }
+  menuBtn?.addEventListener('click', ()=>{
+    sidebarEl.classList.toggle('open');
+    overlayEl.classList.toggle('show');
+  });
+  overlayEl?.addEventListener('click', closeDrawer);
+  document.querySelectorAll('#tocNav a').forEach(a=> a.addEventListener('click', closeDrawer));
+
+  /* ---------- In-browser SQL runner (sql.js / SQLite) ---------- */
+  let dbPromise = null;
+
+  function seedDatabase(SQL){
+    // Fresh empty in-memory database: the remaining runnable examples
+    // create their own tables inline, so no pre-seeded data is needed.
+    return new SQL.Database();
+  }
+
+  function getDb(){
+    if(!dbPromise){
+      dbPromise = initSqlJs({
+        locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
+      }).then(SQL => seedDatabase(SQL));
+    }
+    return dbPromise;
+  }
+
+  window.resetDatabase = function(){
+    dbPromise = null;
+    document.querySelectorAll('.term-output').forEach(o=>{
+      o.classList.add('hidden');
+      o.textContent = '';
+    });
+    getDb();
+  };
+
+  function renderResults(results){
+    if(!results.length){
+      return '(no rows returned: statement executed successfully)';
+    }
+    const frag = document.createElement('div');
+    results.forEach(res=>{
+      const table = document.createElement('table');
+      const thead = document.createElement('tr');
+      res.columns.forEach(c=>{
+        const th = document.createElement('th');
+        th.textContent = c;
+        thead.appendChild(th);
+      });
+      table.appendChild(thead);
+      res.values.forEach(row=>{
+        const tr = document.createElement('tr');
+        row.forEach(cell=>{
+          const td = document.createElement('td');
+          td.textContent = cell === null ? 'NULL' : cell;
+          tr.appendChild(td);
+        });
+        table.appendChild(tr);
+      });
+      frag.appendChild(table);
+    });
+    return frag;
+  }
+
+  async function runSql(button, sql, outputEl){
+    outputEl.classList.remove('hidden');
+    outputEl.textContent = 'Booting SQL engine… (only on first run)';
+    button.disabled = true;
+    const originalLabel = button.textContent;
+    button.textContent = '⏳ Running';
+    try{
+      const db = await getDb();
+      const results = db.exec(sql);
+      const rendered = renderResults(results);
+      outputEl.textContent = '';
+      if(typeof rendered === 'string'){
+        outputEl.textContent = rendered;
+      }else{
+        outputEl.appendChild(rendered);
+      }
+    }catch(err){
+      outputEl.textContent = 'Error: ' + err.message;
+    }finally{
+      button.disabled = false;
+      button.textContent = originalLabel;
+    }
+  }
+
+  function setupRunners(){
+    document.querySelectorAll('pre code.language-sql').forEach((codeEl)=>{
+      const pre = codeEl.parentElement;
+      if(pre.dataset.wrapped) return;
+      pre.dataset.wrapped = "1";
+
+      const runnable = codeEl.dataset.runnable === 'true';
+      const originalCode = codeEl.textContent;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-runner';
+      pre.parentNode.insertBefore(wrapper, pre);
+
+      const bar = document.createElement('div');
+      bar.className = 'code-runner-bar';
+      const label = document.createElement('span');
+      label.textContent = runnable ? 'sql · editable' : 'sql · reference only';
+      bar.appendChild(label);
+
+      if(runnable){
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'code-runner-btns';
+        const resetBtn = document.createElement('button');
+        resetBtn.className = 'reset-btn';
+        resetBtn.textContent = '↺ Reset';
+        resetBtn.title = 'Restore the original query text';
+        const runBtn = document.createElement('button');
+        runBtn.className = 'run-btn';
+        runBtn.textContent = '▶ Run';
+        btnGroup.appendChild(resetBtn);
+        btnGroup.appendChild(runBtn);
+        bar.appendChild(btnGroup);
+        wrapper.appendChild(bar);
+
+        const textarea = document.createElement('textarea');
+        textarea.className = 'code-editor';
+        textarea.spellcheck = false;
+        textarea.value = originalCode;
+        const lineCount = originalCode.split('\n').length;
+        textarea.rows = Math.min(Math.max(lineCount, 3), 22);
+        wrapper.appendChild(textarea);
+
+        textarea.addEventListener('keydown', (e)=>{
+          if(e.key === 'Tab'){
+            e.preventDefault();
+            const start = textarea.selectionStart, end = textarea.selectionEnd;
+            textarea.value = textarea.value.slice(0, start) + '  ' + textarea.value.slice(end);
+            textarea.selectionStart = textarea.selectionEnd = start + 2;
+          }
+        });
+
+        pre.remove();
+
+        const out = document.createElement('div');
+        out.className = 'term-output hidden';
+        wrapper.appendChild(out);
+
+        resetBtn.addEventListener('click', ()=>{
+          textarea.value = originalCode;
+          out.classList.add('hidden');
+        });
+        runBtn.addEventListener('click', ()=> runSql(runBtn, textarea.value, out));
+      } else {
+        const tag = document.createElement('span');
+        tag.className = 'not-runnable-tag';
+        tag.textContent = 'not runnable here';
+        bar.appendChild(tag);
+        wrapper.appendChild(bar);
+        wrapper.appendChild(pre);
+      }
+    });
+  }
+  setupRunners();
+
+  const STORAGE_KEY = 'dbms_progress_v1';
+  function loadProgress(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const boxes = document.querySelectorAll('.qcard input[type=checkbox]');
+      boxes.forEach((box, i)=>{ if(saved[i]) box.checked = true; });
+    }catch(e){}
+    updateCoverage();
+  }
+  function saveProgress(){
+    const boxes = document.querySelectorAll('.qcard input[type=checkbox]');
+    const state = {};
+    boxes.forEach((box, i)=>{ state[i] = box.checked; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateCoverage();
+  }
+  function updateCoverage(){
+    const boxes = document.querySelectorAll('.qcard input[type=checkbox]');
+    const total = boxes.length;
+    const checked = Array.from(boxes).filter(b=>b.checked).length;
+    const pct = total ? Math.round((checked/total)*100) : 0;
+    document.getElementById('coveragePct').textContent = pct + '%';
+    document.getElementById('barFill').style.width = pct + '%';
+    document.getElementById('coverageCount').textContent = checked + ' of ' + total + ' topics reviewed';
+  }
+
+  document.getElementById('searchBox').addEventListener('input', (e)=>{
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('.qcard').forEach(card=>{
+      const txt = card.textContent.toLowerCase();
+      card.classList.toggle('hidden', q.length > 0 && !txt.includes(q));
+      if(q.length > 0 && txt.includes(q)) card.classList.add('open');
+    });
+  });
+
+  const sections = document.querySelectorAll('section.unit, header.hero');
+  const navLinks = document.querySelectorAll('#tocNav a');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const id = entry.target.id;
+        navLinks.forEach(a=> a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s=>io.observe(s));
+
+  loadProgress();
+</script>
+</body>
+</html>
